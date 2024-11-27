@@ -1,5 +1,6 @@
 #! /Users/oliclive-griffin/code/tagger/.venv/bin/python
 
+# (mostly written by claude)
 import os
 import json
 import sys
@@ -178,7 +179,6 @@ Example response format: ["tag1", "tag2", "tag3"]"""
             print(f"Error processing {filepath}: {e}")
             raise e
 
-# Example usage
 VAULT_PATH = Path("~/main").expanduser()
 def main():
     # get from command line args
@@ -186,7 +186,12 @@ def main():
         print("please provide a filepath")
         return
     
-    filepath = ' '.join(sys.argv[1:])
+    # expects a filepath as copied from obsidian using the "copy path" hotkey, this causes spaces to be included
+    # this will break if there are multiple spaces in the filepath, not a big deal
+    called_via_shebang = __file__ in sys.argv[0]
+    path_args = sys.argv[1:] if called_via_shebang else sys.argv[2:]
+    filepath = ' '.join(path_args)
+
     api_key = os.getenv('ANTHROPIC_API_KEY')
     if not api_key:
         print("please set ANTHROPIC_API_KEY")
