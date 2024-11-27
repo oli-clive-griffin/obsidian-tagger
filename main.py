@@ -1,5 +1,3 @@
-#! /Users/oliclive-griffin/code/tagger/.venv/bin/python
-
 # (mostly written by claude)
 import os
 import json
@@ -7,6 +5,9 @@ import sys
 import yaml
 import anthropic
 from pathlib import Path
+
+# change to match your vault path
+VAULT_PATH = Path("~/main").expanduser()
 
 class ObsidianTagger:
     def __init__(self, vault_path: Path, api_key: str):
@@ -179,18 +180,16 @@ Example response format: ["tag1", "tag2", "tag3"]"""
             print(f"Error processing {filepath}: {e}")
             raise e
 
-VAULT_PATH = Path("~/main").expanduser()
 def main():
     # get from command line args
     if len(sys.argv) < 2:
         print("please provide a filepath")
         return
     
-    # expects a filepath as copied from obsidian using the "copy path" hotkey, this causes spaces to be included
-    # this will break if there are multiple spaces in the filepath, not a big deal
-    called_via_shebang = __file__ in sys.argv[0]
-    path_args = sys.argv[1:] if called_via_shebang else sys.argv[2:]
-    filepath = ' '.join(path_args)
+    # expects a filepath as copied from obsidian using the "copy path" hotkey
+    if sys.argv[0] not in __file__:
+        raise ValueError(f"expected the first arg to be the script name, {sys.argv[0]}, {__file__}")
+    filepath = sys.argv[1]
 
     api_key = os.getenv('ANTHROPIC_API_KEY')
     if not api_key:
